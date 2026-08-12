@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Thomas-Kilmann | Estilos de Manejo de Conflicto</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            background: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .section {
+            padding: 40px;
+            display: none;
+            min-height: 500px;
+        }
+
+        .section.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* TARJETA DE PREGUNTA */
+        .question-card {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-button {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+
+        .option-button:hover {
+            border-color: #667eea;
+            background: #f8f8f8;
+            transform: translateX(5px);
+        }
+
+        .option-button.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-width: 3px;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-width: 150px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            min-width: 150px;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+            min-width: 150px;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* SECCIÓN RESULTADOS */
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            background: white;
+            padding: 20px;
+            padding-left: 60px;
+            border-radius: 10px;
+        }
+
+        .interpretation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .interpretation-item {
+            padding: 20px;
+            border-left: 5px solid;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+
+        .interpretation-item h3 {
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+
+        .interpretation-item .score-level {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .interpretation-item p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .tips-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .tips-container h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tip-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tip-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .tip-card p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .text-competir { color: #EF4444; }
+        .text-colaborar { color: #10B981; }
+        .text-transar { color: #F59E0B; }
+        .text-evadir { color: #6366F1; }
+        .text-acomodar { color: #8B5CF6; }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+        }
+
+        #pdfContent {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .section {
+                padding: 20px;
+                min-height: auto;
+            }
+
+            .question-number {
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                font-size: 1em;
+            }
+
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 300px;
+                padding-left: 60px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Test Thomas-Kilmann</h1>
+            <p>Estilos de Manejo de Conflicto</p>
+        </header>
+
+        <div class="content">
+            <!-- SECCIÓN DE PREGUNTAS -->
+            <div class="section active" id="questionsSection">
+                <div class="progress-container">
+                    <div class="progress-text">
+                        Pregunta <span id="currentQuestion">1</span> de <span id="totalQuestions">30</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-number" id="questionNumber">1</div>
+                    <div id="questionText" style="font-size: 1.2em; color: #333; line-height: 1.6; font-weight: 500;"></div>
+                    <div class="options-container">
+                        <button class="option-button" id="optionA" onclick="selectOption('a')">
+                            <span class="option-letter">A.</span>
+                            <span id="optionAText"></span>
+                        </button>
+                        <button class="option-button" id="optionB" onclick="selectOption('b')">
+                            <span class="option-letter">B.</span>
+                            <span id="optionBText"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>← Anterior</button>
+                    <button class="btn-primary" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                </div>
+            </div>
+
+            <!-- SECCIÓN DE RESULTADOS -->
+            <div class="section" id="resultsSection">
+                <div class="results-container">
+                    <h2 style="font-size: 2em; text-align: center;">Tu Perfil de Manejo de Conflicto</h2>
+
+                    <div id="pdfContent">
+                        <div class="chart-container">
+                            <canvas id="resultsChart"></canvas>
+                        </div>
+
+                        <div>
+                            <h2 style="margin-bottom: 20px; font-size: 1.5em;">Interpretación de Resultados</h2>
+                            <div class="interpretation-container" id="interpretationsContainer"></div>
+                        </div>
+
+                        <div class="tips-container">
+                            <h2>💡 Tips para Mejorar tu Manejo de Conflictos</h2>
+                            <div class="tips-grid" id="tipsContainer"></div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="vuelveAlInicio()">← Volver a Empezar</button>
+                        <button class="btn-success" onclick="descargarPDF()">📥 Descargar PDF</button>
+                        <button class="btn-primary" onclick="compartirResultados()">📋 Compartir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Basado en el Instrumento de Thomas-Kilmann para estilos de manejo de conflicto © 2024</p>
+        </div>
+    </div>
+
+    <script>
+        // ============ PREGUNTAS DEL TEST ============
+        const questions = [
+            {
+                id: 1,
+                a: { text: "Hay ocasiones en las que dejo a los demás tomar la responsabilidad para resolver el problema", style: "Evadir" },
+                b: { text: "Más que negociar las cosas en las que no estamos de acuerdo, trato de resaltar las cosas en las que ambas partes están de acuerdo", style: "Acomodar" }
+            },
+            {
+                id: 2,
+                a: { text: "Trato de encontrar una solución de compromiso", style: "Transar" },
+                b: { text: "Puede que intente resolver todas sus preocupaciones y las mías", style: "Colaborar" }
+            },
+            {
+                id: 3,
+                a: { text: "Normalmente me muestro firme en alcanzar mis objetivos", style: "Competir" },
+                b: { text: "Puede que intente calmar los sentimientos de los demás y preservar nuestra relación", style: "Acomodar" }
+            },
+            {
+                id: 4,
+                a: { text: "Trato de encontrar una solución de compromiso", style: "Transar" },
+                b: { text: "A veces sacrifico mis propios deseos por los deseos de la otra parte", style: "Acomodar" }
+            },
+            {
+                id: 5,
+                a: { text: "Busco constantemente la ayuda de los demás para encontrar una solución", style: "Colaborar" },
+                b: { text: "Trato de hacer todo lo posible para eludir tensiones innecesarias", style: "Evadir" }
+            },
+            {
+                id: 6,
+                a: { text: "Trato de evitar el crear situaciones desagradables para mí", style: "Evadir" },
+                b: { text: "Trato de que mi postura prevalezca", style: "Competir" }
+            },
+            {
+                id: 7,
+                a: { text: "Trato de posponer el tema hasta que haya tenido el tiempo suficiente para pensarlo", style: "Evadir" },
+                b: { text: "Cedo en algunos puntos a cambio de otros", style: "Transar" }
+            },
+            {
+                id: 8,
+                a: { text: "Normalmente me muestro firme en alcanzar mis objetivos", style: "Competir" },
+                b: { text: "Intento tratar abiertamente todos aquellos temas que me preocupan", style: "Colaborar" }
+            },
+            {
+                id: 9,
+                a: { text: "Creo que no siempre merece la pena preocuparse por las diferencias", style: "Evadir" },
+                b: { text: "Hago cierto esfuerzo por imponer mis ideas", style: "Competir" }
+            },
+            {
+                id: 10,
+                a: { text: "Me muestro firme en conseguir mis objetivos", style: "Competir" },
+                b: { text: "Trato de buscar una solución de compromiso", style: "Transar" }
+            },
+            {
+                id: 11,
+                a: { text: "Intento mostrar abiertamente de forma inmediata todas las preocupaciones y los temas que las originan", style: "Colaborar" },
+                b: { text: "Puede que intente calmar los sentimientos de los demás y preservar nuestra relación", style: "Acomodar" }
+            },
+            {
+                id: 12,
+                a: { text: "A veces evito tomar posiciones que puedan crear controversia", style: "Evadir" },
+                b: { text: "Estoy dispuesto a dejar que la otra parte consiga algunas de sus posiciones si me deja quedarme con las mías", style: "Transar" }
+            },
+            {
+                id: 13,
+                a: { text: "Propongo un punto intermedio", style: "Transar" },
+                b: { text: "Presiono para que se acepten mis puntos de vista", style: "Competir" }
+            },
+            {
+                id: 14,
+                a: { text: "Comento mis ideas a la otra parte y me intereso por las suyas", style: "Colaborar" },
+                b: { text: "Trato de mostrar a la otra parte la lógica de mi postura", style: "Competir" }
+            },
+            {
+                id: 15,
+                a: { text: "Puede que intente calmar los sentimientos de los demás y preservar nuestra relación", style: "Acomodar" },
+                b: { text: "Trato de hacer lo necesario para evitar tensiones", style: "Evadir" }
+            },
+            {
+                id: 16,
+                a: { text: "Trato de no herir los sentimientos de los demás", style: "Acomodar" },
+                b: { text: "Trato de convencer a la otra parte de lo válido de mi posición", style: "Competir" }
+            },
+            {
+                id: 17,
+                a: { text: "Normalmente me muestro firme en alcanzar mis metas", style: "Competir" },
+                b: { text: "Trato de hacer todo lo posible para evitar tensiones innecesarias", style: "Evadir" }
+            },
+            {
+                id: 18,
+                a: { text: "A veces puedo permitir a la otra parte el mantener sus posturas si ello les hace sentirse felices", style: "Acomodar" },
+                b: { text: "Dejaré que la otra parte consiga algunas de sus posiciones si me deja quedarme con algunas de las mías", style: "Transar" }
+            },
+            {
+                id: 19,
+                a: { text: "Intento mostrar de forma inmediata todas las preocupaciones y temas", style: "Colaborar" },
+                b: { text: "Trato de posponer el tema hasta que haya tenido tiempo para pensar en ello", style: "Evadir" }
+            },
+            {
+                id: 20,
+                a: { text: "Intento tratar de forma inmediata nuestras diferencias", style: "Colaborar" },
+                b: { text: "Trato de buscar una combinación de beneficios y pérdidas que sea justa para ambos", style: "Transar" }
+            },
+            {
+                id: 21,
+                a: { text: "Al afrontar las negociaciones, trato de mostrarme considerado con los deseos de la otra parte", style: "Acomodar" },
+                b: { text: "Siempre tiendo a la discusión directa del problema", style: "Colaborar" }
+            },
+            {
+                id: 22,
+                a: { text: "Trato de buscar una posición intermedia entre la suya y la mía", style: "Transar" },
+                b: { text: "Reafirmo mis deseos", style: "Competir" }
+            },
+            {
+                id: 23,
+                a: { text: "Con mucha frecuencia me preocupa satisfacer todos nuestros deseos", style: "Colaborar" },
+                b: { text: "Hay ocasiones en las que dejo a los demás que tomen la responsabilidad de resolver el problema", style: "Evadir" }
+            },
+            {
+                id: 24,
+                a: { text: "Si la posición de la otra parte me parece muy importante para ella, trataría de adaptarme a sus deseos", style: "Acomodar" },
+                b: { text: "Trato de que la otra parte apruebe una solución de compromiso", style: "Transar" }
+            },
+            {
+                id: 25,
+                a: { text: "Trato de mostrar a la otra persona la lógica y los beneficios de mi postura", style: "Competir" },
+                b: { text: "Al afrontar las negociaciones, trato de mostrarme considerado con los deseos de la otra parte", style: "Acomodar" }
+            },
+            {
+                id: 26,
+                a: { text: "Propongo un punto intermedio", style: "Transar" },
+                b: { text: "Casi siempre estoy preocupado por satisfacer todos nuestros deseos", style: "Colaborar" }
+            },
+            {
+                id: 27,
+                a: { text: "A veces evito tomar posiciones que puedan crear controversia", style: "Evadir" },
+                b: { text: "Si ello hace feliz a los demás, puede que les deje mantener sus posturas", style: "Acomodar" }
+            },
+            {
+                id: 28,
+                a: { text: "Normalmente me muestro firme en alcanzar mis metas y objetivos", style: "Competir" },
+                b: { text: "Normalmente busco la ayuda de los demás para buscar una solución", style: "Colaborar" }
+            },
+            {
+                id: 29,
+                a: { text: "Propongo un punto intermedio", style: "Transar" },
+                b: { text: "Creo que no siempre merece la pena preocuparse por las diferencias", style: "Evadir" }
+            },
+            {
+                id: 30,
+                a: { text: "Trato de no herir los sentimientos de los demás", style: "Acomodar" },
+                b: { text: "Siempre explico el problema a la otra parte para que podamos resolverlo", style: "Colaborar" }
+            }
+        ];
+
+        // ============ DEFINICIÓN DE ESTILOS ============
+        const styles = {
+            Competir: { color: '#EF4444', foco_propio: 'Muy alto', foco_otro: 'Bajo', emoji: '🔴' },
+            Colaborar: { color: '#10B981', foco_propio: 'Alto', foco_otro: 'Alto', emoji: '🟢' },
+            Transar: { color: '#F59E0B', foco_propio: 'Medio', foco_otro: 'Medio', emoji: '🟠' },
+            Evadir: { color: '#6366F1', foco_propio: 'Bajo', foco_otro: 'Bajo', emoji: '🔵' },
+            Acomodar: { color: '#8B5CF6', foco_propio: 'Bajo', foco_otro: 'Alto', emoji: '🟣' }
+        };
+
+        let userResponses = {};
+        let currentQuestionIndex = 0;
+        let chartInstance = null;
+
+        function init() {
+            document.getElementById('totalQuestions').textContent = questions.length;
+            displayQuestion(0);
+        }
+
+        function displayQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+
+            currentQuestionIndex = index;
+            const question = questions[index];
+
+            document.getElementById('currentQuestion').textContent = index + 1;
+            document.getElementById('questionNumber').textContent = question.id;
+            document.getElementById('questionText').textContent = `¿Cuál de las siguientes afirmaciones te describe mejor?`;
+            document.getElementById('optionAText').textContent = question.a.text;
+            document.getElementById('optionBText').textContent = question.b.text;
+
+            const progress = ((index + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            const optionA = document.getElementById('optionA');
+            const optionB = document.getElementById('optionB');
+            optionA.classList.remove('selected');
+            optionB.classList.remove('selected');
+
+            if (userResponses[question.id] === 'a') optionA.classList.add('selected');
+            if (userResponses[question.id] === 'b') optionB.classList.add('selected');
+
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').textContent = index === questions.length - 1 ? 'Ver Resultados' : 'Siguiente →';
+        }
+
+        function selectOption(option) {
+            const question = questions[currentQuestionIndex];
+            userResponses[question.id] = option;
+
+            const optionA = document.getElementById('optionA');
+            const optionB = document.getElementById('optionB');
+            optionA.classList.remove('selected');
+            optionB.classList.remove('selected');
+
+            if (option === 'a') optionA.classList.add('selected');
+            if (option === 'b') optionB.classList.add('selected');
+
+            // Si es la última pregunta, mostrar resultados. Si no, avanzar
+            if (currentQuestionIndex === questions.length - 1) {
+                setTimeout(() => {
+                    showResults();
+                }, 400);
+            } else {
+                setTimeout(() => {
+                    displayQuestion(currentQuestionIndex + 1);
+                }, 400);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                displayQuestion(currentQuestionIndex + 1);
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                displayQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function calculateResults() {
+            const results = {
+                Competir: 0,
+                Colaborar: 0,
+                Transar: 0,
+                Evadir: 0,
+                Acomodar: 0
+            };
+
+            Object.keys(userResponses).forEach(qId => {
+                const questionId = parseInt(qId);
+                const option = userResponses[qId];
+                const question = questions.find(q => q.id === questionId);
+
+                if (question) {
+                    const style = option === 'a' ? question.a.style : question.b.style;
+                    results[style]++;
+                }
+            });
+
+            return results;
+        }
+
+        function showResults() {
+            const results = calculateResults();
+            
+            document.getElementById('questionsSection').classList.remove('active');
+            document.getElementById('resultsSection').classList.add('active');
+
+            setTimeout(() => {
+                displayChart(results);
+                displayInterpretations(results);
+                displayTips(results);
+            }, 100);
+        }
+
+        function displayChart(results) {
+            const canvas = document.getElementById('resultsChart');
+            const ctx = canvas.getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const colors = {
+                Competir: '#EF4444',
+                Colaborar: '#10B981',
+                Transar: '#F59E0B',
+                Evadir: '#6366F1',
+                Acomodar: '#8B5CF6'
+            };
+
+            const referenceLinesPlugin = {
+                id: 'referenceLinesPlugin',
+                afterDraw(chart) {
+                    const ctx = chart.ctx;
+                    const yAxis = chart.scales.y;
+                    const left = chart.chartArea.left;
+                    const right = chart.chartArea.right;
+
+                    // Definir las zonas de color
+                    const zones = [
+                        { min: 0, max: 5, color: 'rgba(239, 68, 68, 0.10)' },
+                        { min: 5, max: 7, color: 'rgba(34, 197, 94, 0.12)' },
+                        { min: 7, max: 12, color: 'rgba(59, 130, 246, 0.10)' }
+                    ];
+
+                    // Dibujar zonas de fondo sin bordes
+                    zones.forEach(zone => {
+                        const yMin = yAxis.getPixelForValue(zone.max);
+                        const yMax = yAxis.getPixelForValue(zone.min);
+                        const height = yMax - yMin;
+
+                        ctx.save();
+                        ctx.fillStyle = zone.color;
+                        ctx.fillRect(left, yMin, right - left, height);
+                        ctx.restore();
+                    });
+
+                    // Definir los niveles con sus rangos
+                    const levels = [
+                        { label: 'Muy Bajo', position: 1 },
+                        { label: 'Bajo', position: 3.5 },
+                        { label: 'Promedio', position: 6 },
+                        { label: 'Alto', position: 8.5 },
+                        { label: 'Muy Alto', position: 11 }
+                    ];
+
+                    // Dibujar textos de nivel rotados 90 grados en el eje Y
+                    levels.forEach(level => {
+                        const y = yAxis.getPixelForValue(level.position);
+                        
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(100, 100, 100, 0.5)';
+                        ctx.font = '10px Arial';
+                        
+                        // Posicionar y rotar el texto 90 grados
+                        ctx.translate(left - 35, y);
+                        ctx.rotate(-Math.PI / 2);
+                        ctx.textAlign = 'center';
+                        ctx.fillText(level.label, 0, 0);
+                        
+                        ctx.restore();
+                    });
+                }
+            };
+
+            // Plugin para mostrar valores encima de las barras
+            const dataLabelsPlugin = {
+                id: 'dataLabelsPlugin',
+                afterDatasetsDraw(chart) {
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        meta.data.forEach((bar, index) => {
+                            const data = dataset.data[index];
+                            const x = bar.x;
+                            const y = bar.y;
+
+                            const ctx = chart.ctx;
+                            ctx.save();
+                            ctx.fillStyle = '#333';
+                            ctx.font = 'bold 12px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(data, x, y - 8);
+                            ctx.restore();
+                        });
+                    });
+                }
+            };
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(results),
+                    datasets: [{
+                        label: 'Puntuación',
+                        data: Object.values(results),
+                        backgroundColor: Object.keys(results).map(style => colors[style]),
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 12,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                },
+                plugins: [referenceLinesPlugin, dataLabelsPlugin]
+            });
+        }
+
+        function displayInterpretations(results) {
+            const interpretations = {
+                Competir: {
+                    high: "Eres muy asertivo. Buscas satisfacer tus propios intereses a veces a costa de los demás. Ideal para emergencias pero puede aislar.",
+                    medium: "Usas el estilo de competencia de forma equilibrada. Puedes ser firme cuando es necesario sin sobreimponer tu punto de vista.",
+                    low: "Raramente compites. Puedes tener dificultad para asumir posturas firmes incluso cuando sabes que es necesario."
+                },
+                Colaborar: {
+                    high: "Eres un colaborador genuino. Buscas soluciones que satisfagan ambas partes. Excelente para resolver conflictos complejos pero consume tiempo.",
+                    medium: "Equilibras bien la colaboración con otros estilos. Buscas soluciones ganar-ganar pero también sabes adaptarte.",
+                    low: "Tienes dificultad viendo el conflicto como oportunidad de ganar mutuamente. Podrías perder compromisos valiosos."
+                },
+                Transar: {
+                    high: "Eres negociador natural. Buscas soluciones mutuamente aceptables. Cuidado: no pierdas de vista los principios fundamentales.",
+                    medium: "Usas el compromiso adecuadamente. Sabes cuándo buscar punto medio y cuándo no.",
+                    low: "Te cuesta hacer concesiones. Podrías quedarte atrapado en argumentos destructivos."
+                },
+                Evadir: {
+                    high: "Tiendes a evitar confrontaciones. Útil para problemas triviales pero puede afectar la coordinación con otros.",
+                    medium: "Evitas cuando es apropiado. Sabes cuándo aplazar y cuándo confrontar.",
+                    low: "Confrontas casi siempre. Podrías lastimar sentimientos o crear hostilidades innecesariamente."
+                },
+                Acomodar: {
+                    high: "Eres muy considerado con otros. Sacrificas tus intereses fácilmente. Riesgo de perder influencia y respeto.",
+                    medium: "Balanceas bien tus intereses con los de otros. Eres considerado sin perder tu voz.",
+                    low: "Rara vez cedes. Podrías parecer poco razonable o tener dificultad admitir errores."
+                }
+            };
+
+            const container = document.getElementById('interpretationsContainer');
+            container.innerHTML = '';
+
+            Object.keys(results).forEach(style => {
+                const score = results[style];
+                let level = '', levelText = '';
+                
+                if (score >= 10) {
+                    level = 'high';
+                    levelText = 'Muy Alto';
+                } else if (score >= 8) {
+                    level = 'high';
+                    levelText = 'Alto';
+                } else if (score >= 5) {
+                    level = 'medium';
+                    levelText = 'Promedio';
+                } else if (score >= 3) {
+                    level = 'low';
+                    levelText = 'Bajo';
+                } else {
+                    level = 'low';
+                    levelText = 'Muy Bajo';
+                }
+
+                const div = document.createElement('div');
+                div.className = `interpretation-item`;
+                div.style.borderLeftColor = styles[style].color;
+
+                const text = interpretations[style][level];
+                const styleKey = style.toLowerCase();
+                
+                div.innerHTML = `
+                    <h3 class="text-${styleKey}">${styles[style].emoji} ${style}</h3>
+                    <div class="score-level">
+                        Puntaje: ${score}/12 - ${levelText}
+                        <br>
+                        Foco en necesidades propias: ${styles[style].foco_propio} | Foco en necesidades de otra persona: ${styles[style].foco_otro}
+                    </div>
+                    <p>${text}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function displayTips(results) {
+            // Encontrar el perfil dominante
+            const dominantProfile = Object.keys(results).reduce((a, b) => 
+                results[a] > results[b] ? a : b
+            );
+
+            const tipsData = {
+                Competir: [
+                    {
+                        title: "✓ Aplicaciones de tu estilo",
+                        content: "Es de vital importancia cuando necesitas acción rápida en emergencias. Úsalo para problemas importantes que requieran decisiones impopulares, y cuando estés seguro de tener razón en asuntos vitales para tu bienestar."
+                    },
+                    {
+                        title: "⚠ Si tu puntuación es alta",
+                        content: "Observa si estás rodeado de conformistas o si tus subordinados tienen temor de admitir ignorancia ante ti. Esto puede aislarte de información valiosa. Crea un ambiente donde otros sientan confianza para expresar desacuerdo."
+                    }
+                ],
+                Colaborar: [
+                    {
+                        title: "✓ Aplicaciones de tu estilo",
+                        content: "Úsalo para encontrar soluciones integrales cuando ambos intereses son demasiado importantes para transigir. Es excelente para aprender, incorporar perspectivas diferentes y obtener compromiso genuino de otros. Ideal para superar resentimientos en relaciones interpersonales."
+                    },
+                    {
+                        title: "⚠ Si tu puntuación es alta",
+                        content: "Cuidado de no dedicar tiempo a discusiones profundas en asuntos que no lo ameritan. La colaboración consume recursos. Si tu comportamiento colaborador no genera respuesta colaborativa, considera que pueda haber actitudes defensivas o intereses conflictivos presentes."
+                    }
+                ],
+                Transar: [
+                    {
+                        title: "✓ Aplicaciones de tu estilo",
+                        content: "Úsalo cuando las metas son moderadamente importantes. Perfecto con oponentes de igual poder comprometidos con metas exclusivas. Excelente para arreglos temporales, soluciones rápidas bajo presión de tiempo, y cuando la colaboración no tuvo éxito."
+                    },
+                    {
+                        title: "⚠ Si tu puntuación es alta",
+                        content: "Asegúrate de no perder de vista principios, valores y objetivos a largo plazo concentrándote solo en técnicas de transacción. Evita crear una atmósfera de 'juego cuestionable' que debilite la confianza interpersonal y enfoque en los méritos reales."
+                    }
+                ],
+                Evadir: [
+                    {
+                        title: "✓ Aplicaciones de tu estilo",
+                        content: "Úsalo cuando el problema es trivial o cuando hay asuntos más importantes presionando. Es válido cuando no ves probabilidad de satisfacer intereses. Ideal para dar tiempo a que la gente se calme, recopile información, o cuando otro puede resolver más efectivamente."
+                    },
+                    {
+                        title: "⚠ Si tu puntuación es alta",
+                        content: "La coordinación con otros puede sufrir si no comunicas tus opiniones. Observa si la gente anda con demasiada cautela o si las decisiones importantes se toman de forma descuidada. Necesitas confrontar y resolver los problemas importantes."
+                    }
+                ],
+                Acomodar: [
+                    {
+                        title: "✓ Aplicaciones de tu estilo",
+                        content: "Úsalo cuando comprendas que estás equivocado o cuando el asunto es más importante para el otro. Excelente para acumular créditos sociales, cuando mantener armonía es vital, y para el desarrollo de otros permitiéndoles aprender de sus errores."
+                    },
+                    {
+                        title: "⚠ Si tu puntuación es alta",
+                        content: "Asegúrate de que tus propias ideas e intereses reciban la atención que merecen. Ceder demasiado a otros puede privarte de influencia y respeto. No descuides la disciplina y procedimientos importantes para tu organización."
+                    }
+                ]
+            };
+
+            const tips = tipsData[dominantProfile] || tipsData['Transar'];
+
+            const container = document.getElementById('tipsContainer');
+            container.innerHTML = '';
+
+            tips.forEach(tip => {
+                const card = document.createElement('div');
+                card.className = 'tip-card';
+                card.innerHTML = `<h3>${tip.title}</h3><p>${tip.content}</p>`;
+                container.appendChild(card);
+            });
+        }
+
+        function vuelveAlInicio() {
+            userResponses = {};
+            currentQuestionIndex = 0;
+            document.getElementById('questionsSection').classList.add('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion(0);
+        }
+
+        function compartirResultados() {
+            const results = calculateResults();
+            const text = `Mis resultados del Test Thomas-Kilmann:\n\n${Object.entries(results).map(([style, score]) => `${style}: ${score} puntos`).join('\n')}`;
+            alert(text);
+        }
+
+        function descargarPDF() {
+            const element = document.getElementById('pdfContent');
+            const opt = {
+                margin: 10,
+                filename: 'Test-Thomas-Kilmann-Resultados.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        init();
+    </script>
+</body>
+</html>
