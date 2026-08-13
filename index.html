@@ -412,7 +412,6 @@
 
                 <div class="button-group">
                     <button class="btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>← Anterior</button>
-                    <button class="btn-primary" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
                 </div>
             </div>
 
@@ -649,11 +648,6 @@
             if (userResponses[question.id] === 'b') optionB.classList.add('selected');
 
             document.getElementById('prevBtn').disabled = index === 0;
-            
-            // Desactivar botón siguiente hasta que conteste
-            const nextBtn = document.getElementById('nextBtn');
-            nextBtn.disabled = !isAnswered;
-            nextBtn.textContent = index === questions.length - 1 ? 'Ver Resultados' : 'Siguiente →';
         }
 
         function selectOption(option) {
@@ -677,14 +671,6 @@
                 setTimeout(() => {
                     displayQuestion(currentQuestionIndex + 1);
                 }, 400);
-            }
-        }
-
-        function nextQuestion() {
-            if (currentQuestionIndex < questions.length - 1) {
-                displayQuestion(currentQuestionIndex + 1);
-            } else {
-                showResults();
             }
         }
 
@@ -1010,10 +996,14 @@
 
         function compartirResultados() {
             const results = calculateResults();
+            const dominantProfile = Object.keys(results).reduce((a, b) => 
+                results[a] > results[b] ? a : b
+            );
             
             let text = `🎯 MIS RESULTADOS - TEST THOMAS-KILMANN\n`;
             text += `════════════════════════════════════════\n\n`;
             
+            // Puntuaciones
             Object.entries(results).forEach(([style, score]) => {
                 let level = '';
                 if (score >= 10) level = 'Muy Alto';
@@ -1025,43 +1015,125 @@
                 text += `${style}: ${score}/12 - ${level}\n`;
             });
             
+            // Interpretación del perfil dominante
+            const interpretations = {
+                Competir: {
+                    high: "Eres muy asertivo. Buscas satisfacer tus propios intereses a veces a costa de los demás. Ideal para emergencias pero puede aislar.",
+                    medium: "Usas el estilo de competencia de forma equilibrada. Puedes ser firme cuando es necesario sin sobreimponer tu punto de vista.",
+                    low: "Raramente compites. Puedes tener dificultad para asumir posturas firmes incluso cuando sabes que es necesario."
+                },
+                Colaborar: {
+                    high: "Eres un colaborador genuino. Buscas soluciones que satisfagan ambas partes. Excelente para resolver conflictos complejos pero consume tiempo.",
+                    medium: "Equilibras bien la colaboración con otros estilos. Buscas soluciones ganar-ganar pero también sabes adaptarte.",
+                    low: "Tienes dificultad viendo el conflicto como oportunidad de ganar mutuamente. Podrías perder compromisos valiosos."
+                },
+                Transar: {
+                    high: "Eres negociador natural. Buscas soluciones mutuamente aceptables. Cuidado: no pierdas de vista los principios fundamentales.",
+                    medium: "Usas el compromiso adecuadamente. Sabes cuándo buscar punto medio y cuándo no.",
+                    low: "Te cuesta hacer concesiones. Podrías quedarte atrapado en argumentos destructivos."
+                },
+                Evadir: {
+                    high: "Tiendes a evitar confrontaciones. Útil para problemas triviales pero puede afectar la coordinación con otros.",
+                    medium: "Evitas cuando es apropiado. Sabes cuándo aplazar y cuándo confrontar.",
+                    low: "Confrontas casi siempre. Podrías lastimar sentimientos o crear hostilidades innecesariamente."
+                },
+                Acomodar: {
+                    high: "Eres muy considerado con otros. Sacrificas tus intereses fácilmente. Riesgo de perder influencia y respeto.",
+                    medium: "Balanceas bien tus intereses con los de otros. Eres considerado sin perder tu voz.",
+                    low: "Rara vez cedes. Podrías parecer poco razonable o tener dificultad admitir errores."
+                }
+            };
+            
+            const tipsData = {
+                Competir: [
+                    "✓ Es de vital importancia cuando necesitas acción rápida en emergencias. Úsalo para problemas importantes que requieran decisiones impopulares.",
+                    "⚠ Observa si estás rodeado de conformistas. Crea un ambiente donde otros sientan confianza para expresar desacuerdo."
+                ],
+                Colaborar: [
+                    "✓ Úsalo para encontrar soluciones integrales cuando ambos intereses son importantes. Excelente para aprender e incorporar perspectivas.",
+                    "⚠ Evita discusiones profundas en asuntos que no lo ameritan. Si no hay respuesta colaborativa, puede haber actitudes defensivas."
+                ],
+                Transar: [
+                    "✓ Úsalo cuando las metas son moderadamente importantes. Perfecto para arreglos temporales y soluciones rápidas.",
+                    "⚠ No pierdas de vista principios y valores. Evita crear atmósfera de 'juego cuestionable' que debilite confianza."
+                ],
+                Evadir: [
+                    "✓ Úsalo cuando el problema es trivial o hay asuntos más importantes. Ideal para dar tiempo a que la gente se calme.",
+                    "⚠ La coordinación con otros puede sufrir. Necesitas confrontar y resolver los problemas importantes."
+                ],
+                Acomodar: [
+                    "✓ Úsalo cuando comprendas que estás equivocado o cuando el asunto es más importante para el otro.",
+                    "⚠ Asegúrate de que tus intereses reciban atención. Ceder demasiado puede privarte de influencia y respeto."
+                ]
+            };
+            
+            const score = results[dominantProfile];
+            let level = '';
+            if (score >= 10) level = 'high';
+            else if (score >= 8) level = 'high';
+            else if (score >= 5) level = 'medium';
+            else if (score >= 3) level = 'low';
+            else level = 'low';
+            
+            text += `\n\n📊 ANÁLISIS DE TU ESTILO DOMINANTE: ${dominantProfile.toUpperCase()}\n`;
+            text += `════════════════════════════════════════\n`;
+            text += interpretations[dominantProfile][level];
+            
+            text += `\n\n💡 TIPS PARA MEJORAR\n`;
+            text += `════════════════════════════════════════\n`;
+            tipsData[dominantProfile].forEach((tip, i) => {
+                text += `${i + 1}. ${tip}\n`;
+            });
+            
             text += `\n════════════════════════════════════════\n`;
-            text += `Realiza el test: https://thomas-kilmann-[tudominio].vercel.app`;
+            text += `Realiza el test completo:\nhttps://thomas-kilmann.vercel.app`;
             
             // Copiar al portapapeles
             navigator.clipboard.writeText(text).then(() => {
-                alert('✓ Resultados copiados al portapapeles:\n\n' + text);
+                alert('✓ Resultados copiados al portapapeles');
             }).catch(() => {
-                alert(text);
+                alert('Error al copiar. Aquí están tus resultados:\n\n' + text);
             });
         }
 
         function descargarPDF() {
             const element = document.getElementById('pdfContent');
             
-            // Crear copia para PDF
-            const clonedElement = element.cloneNode(true);
+            if (!element) {
+                alert('Error: No se pueden encontrar los resultados');
+                return;
+            }
             
-            const opt = {
-                margin: [15, 15, 15, 15],
-                filename: 'Test-Thomas-Kilmann-Resultados.pdf',
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { 
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff'
-                },
-                jsPDF: { 
-                    orientation: 'portrait', 
-                    unit: 'mm', 
-                    format: 'a4',
-                    compress: true
-                },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
-            
-            html2pdf().set(opt).from(clonedElement).save();
+            // Esperar un momento para asegurar que todo está renderizado
+            setTimeout(() => {
+                const opt = {
+                    margin: 10,
+                    filename: 'Test-Thomas-Kilmann-Resultados.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                        windowWidth: 800
+                    },
+                    jsPDF: { 
+                        orientation: 'portrait', 
+                        unit: 'mm', 
+                        format: 'a4'
+                    }
+                };
+                
+                html2pdf()
+                    .set(opt)
+                    .from(element)
+                    .save()
+                    .catch(error => {
+                        console.error('Error al generar PDF:', error);
+                        alert('Error al descargar PDF. Intenta de nuevo.');
+                    });
+            }, 500);
         }
 
         init();
