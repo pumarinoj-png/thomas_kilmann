@@ -507,8 +507,7 @@
 
                     <div class="button-group">
                         <button class="btn-secondary" onclick="vuelveAlInicio()">← Volver a Empezar</button>
-                        <button class="btn-success" onclick="descargarPDF()">📥 Descargar PDF</button>
-                        <button class="btn-primary" onclick="compartirResultados()">📋 Compartir</button>
+                        <button class="btn-primary" onclick="compartirResultados()">📋 Copiar Resultados</button>
                     </div>
                 </div>
             </div>
@@ -1069,10 +1068,20 @@
                 results[a] > results[b] ? a : b
             );
             
-            let text = `🎯 MIS RESULTADOS - TEST THOMAS-KILMANN\n`;
-            text += `════════════════════════════════════════\n\n`;
+            const styles = {
+                Competir: '🔴',
+                Colaborar: '🟢',
+                Transar: '🟠',
+                Evadir: '🔵',
+                Acomodar: '🟣'
+            };
             
-            // Puntuaciones
+            let text = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            text += `🎯 TEST THOMAS-KILMANN - MIS RESULTADOS\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            text += `📊 PUNTUACIONES\n`;
+            text += `───────────────────────────────────────\n`;
             Object.entries(results).forEach(([style, score]) => {
                 let level = '';
                 if (score >= 10) level = 'Muy Alto';
@@ -1081,10 +1090,9 @@
                 else if (score >= 3) level = 'Bajo';
                 else level = 'Muy Bajo';
                 
-                text += `${style}: ${score}/12 - ${level}\n`;
+                text += `${styles[style]} ${style.padEnd(12)} ${score}/12  (${level})\n`;
             });
             
-            // Interpretación del perfil dominante
             const interpretations = {
                 Competir: {
                     high: "Eres muy asertivo. Buscas satisfacer tus propios intereses a veces a costa de los demás. Ideal para emergencias pero puede aislar.",
@@ -1113,29 +1121,6 @@
                 }
             };
             
-            const tipsData = {
-                Competir: [
-                    "✓ Es de vital importancia cuando necesitas acción rápida en emergencias. Úsalo para problemas importantes que requieran decisiones impopulares.",
-                    "⚠ Observa si estás rodeado de conformistas. Crea un ambiente donde otros sientan confianza para expresar desacuerdo."
-                ],
-                Colaborar: [
-                    "✓ Úsalo para encontrar soluciones integrales cuando ambos intereses son importantes. Excelente para aprender e incorporar perspectivas.",
-                    "⚠ Evita discusiones profundas en asuntos que no lo ameritan. Si no hay respuesta colaborativa, puede haber actitudes defensivas."
-                ],
-                Transar: [
-                    "✓ Úsalo cuando las metas son moderadamente importantes. Perfecto para arreglos temporales y soluciones rápidas.",
-                    "⚠ No pierdas de vista principios y valores. Evita crear atmósfera de 'juego cuestionable' que debilite confianza."
-                ],
-                Evadir: [
-                    "✓ Úsalo cuando el problema es trivial o hay asuntos más importantes. Ideal para dar tiempo a que la gente se calme.",
-                    "⚠ La coordinación con otros puede sufrir. Necesitas confrontar y resolver los problemas importantes."
-                ],
-                Acomodar: [
-                    "✓ Úsalo cuando comprendas que estás equivocado o cuando el asunto es más importante para el otro.",
-                    "⚠ Asegúrate de que tus intereses reciban atención. Ceder demasiado puede privarte de influencia y respeto."
-                ]
-            };
-            
             const score = results[dominantProfile];
             let level = '';
             if (score >= 10) level = 'high';
@@ -1144,79 +1129,51 @@
             else if (score >= 3) level = 'low';
             else level = 'low';
             
-            text += `\n\n📊 ANÁLISIS DE TU ESTILO DOMINANTE: ${dominantProfile.toUpperCase()}\n`;
-            text += `════════════════════════════════════════\n`;
+            text += `\n🎯 TU ESTILO DOMINANTE\n`;
+            text += `───────────────────────────────────────\n`;
+            text += `${styles[dominantProfile]} ${dominantProfile} (${score}/12)\n\n`;
             text += interpretations[dominantProfile][level];
             
-            text += `\n\n💡 TIPS PARA MEJORAR\n`;
-            text += `════════════════════════════════════════\n`;
-            tipsData[dominantProfile].forEach((tip, i) => {
-                text += `${i + 1}. ${tip}\n`;
+            text += `\n\n💡 CONSEJOS PRÁCTICOS\n`;
+            text += `───────────────────────────────────────\n`;
+            
+            const tipsData = {
+                Competir: [
+                    "→ Úsalo para emergencias que requieren decisión rápida",
+                    "→ Crea ambiente donde otros se sientan seguros expresar desacuerdo"
+                ],
+                Colaborar: [
+                    "→ Ideal para soluciones que satisfagan ambas partes",
+                    "→ Evita discusiones profundas en asuntos triviales"
+                ],
+                Transar: [
+                    "→ Excelente para arreglos temporales y soluciones rápidas",
+                    "→ No pierdas de vista tus principios fundamentales"
+                ],
+                Evadir: [
+                    "→ Útil para problemas triviales o cuando hay urgencias mayores",
+                    "→ Confronta los problemas importantes para evitar resentimientos"
+                ],
+                Acomodar: [
+                    "→ Perfecto cuando comprendes que estás equivocado",
+                    "→ Protege tus intereses, no cedas siempre"
+                ]
+            };
+            
+            tipsData[dominantProfile].forEach(tip => {
+                text += `${tip}\n`;
             });
             
-            text += `\n════════════════════════════════════════\n`;
-            text += `Realiza el test completo:\nhttps://thomas-kilmann.vercel.app`;
+            text += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            text += `Realiza el test: thomas-kilmann.vercel.app\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
             
             // Copiar al portapapeles
             navigator.clipboard.writeText(text).then(() => {
-                alert('✓ Resultados copiados al portapapeles');
+                alert('✓ ¡Resultados copiados!\n\nPuedes pegarlos en:\n• WhatsApp\n• Email\n• Redes sociales\n• Documentos');
             }).catch(() => {
-                alert('Error al copiar. Aquí están tus resultados:\n\n' + text);
+                alert('Aquí están tus resultados:\n\n' + text);
             });
-        }
-
-        function descargarPDF() {
-            const element = document.getElementById('pdfContent');
-            
-            if (!element) {
-                alert('Error: No se pueden encontrar los resultados');
-                return;
-            }
-            
-            const originalText = document.querySelector('.btn-success').textContent;
-            document.querySelector('.btn-success').textContent = '⏳ Generando PDF...';
-            document.querySelector('.btn-success').disabled = true;
-            
-            setTimeout(() => {
-                const opt = {
-                    margin: [10, 10, 10, 10],
-                    filename: 'Test-Thomas-Kilmann-Resultados.pdf',
-                    image: { type: 'jpeg', quality: 0.95 },
-                    html2canvas: { 
-                        scale: 2.5,
-                        useCORS: true,
-                        allowTaint: true,
-                        backgroundColor: '#ffffff',
-                        logging: false,
-                        windowHeight: element.scrollHeight,
-                        windowWidth: 900,
-                        timeout: 15000,
-                        letterRendering: true
-                    },
-                    jsPDF: { 
-                        orientation: 'portrait', 
-                        unit: 'mm', 
-                        format: 'a4',
-                        compress: false
-                    },
-                    pagebreak: { mode: 'avoid-all', before: '.interpretation-item', after: '.tip-card' }
-                };
-                
-                html2pdf()
-                    .set(opt)
-                    .from(element)
-                    .save()
-                    .then(() => {
-                        document.querySelector('.btn-success').textContent = originalText;
-                        document.querySelector('.btn-success').disabled = false;
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        document.querySelector('.btn-success').textContent = originalText;
-                        document.querySelector('.btn-success').disabled = false;
-                        alert('Problema al generar PDF. Por favor intenta de nuevo.');
-                    });
-            }, 1000);
         }
 
         init();
