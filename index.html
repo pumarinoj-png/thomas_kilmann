@@ -1104,36 +1104,50 @@
                 return;
             }
             
-            // Esperar un momento para asegurar que todo está renderizado
+            // Mostrar un mensaje mientras se genera
+            const originalText = document.querySelector('.btn-success').textContent;
+            document.querySelector('.btn-success').textContent = '⏳ Generando PDF...';
+            document.querySelector('.btn-success').disabled = true;
+            
+            // Esperar a que todo esté listo
             setTimeout(() => {
                 const opt = {
-                    margin: 10,
+                    margin: [15, 15, 15, 15],
                     filename: 'Test-Thomas-Kilmann-Resultados.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
+                    image: { type: 'jpeg', quality: 0.95 },
                     html2canvas: { 
-                        scale: 2,
+                        scale: 3,
                         useCORS: true,
                         allowTaint: true,
                         backgroundColor: '#ffffff',
                         logging: false,
-                        windowWidth: 800
+                        windowHeight: element.scrollHeight + 100,
+                        windowWidth: 1200,
+                        timeout: 10000
                     },
                     jsPDF: { 
                         orientation: 'portrait', 
                         unit: 'mm', 
                         format: 'a4'
-                    }
+                    },
+                    pagebreak: { mode: 'avoid-all', before: '.interpretation-item' }
                 };
                 
                 html2pdf()
                     .set(opt)
                     .from(element)
                     .save()
+                    .then(() => {
+                        document.querySelector('.btn-success').textContent = originalText;
+                        document.querySelector('.btn-success').disabled = false;
+                    })
                     .catch(error => {
-                        console.error('Error al generar PDF:', error);
-                        alert('Error al descargar PDF. Intenta de nuevo.');
+                        console.error('Error:', error);
+                        document.querySelector('.btn-success').textContent = originalText;
+                        document.querySelector('.btn-success').disabled = false;
+                        alert('Problema al generar PDF. Por favor intenta de nuevo.');
                     });
-            }, 500);
+            }, 800);
         }
 
         init();
