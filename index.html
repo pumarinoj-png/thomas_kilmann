@@ -317,30 +317,99 @@
 
         #pdfContent {
             display: block;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #pdfContent h2 {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            background: white;
+            padding: 15px;
+            padding-left: 55px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 700px;
+        }
+
+        .interpretation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .interpretation-item {
+            padding: 15px;
+            border-left: 4px solid;
+            border-radius: 5px;
+            background: #f9f9f9;
+            margin: 0 auto;
+            max-width: 700px;
+        }
+
+        .tips-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 700px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .tip-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         @media print {
-            body {
-                background: white;
-                padding: 0;
+            #pdfContent {
+                max-width: 100%;
+                padding: 10px;
+                margin: 0;
             }
-            
+
             .chart-container {
                 page-break-inside: avoid;
-                background: white;
-                padding: 20px;
+                max-width: 100%;
+                margin: 15px 0;
+                padding: 10px;
+                padding-left: 50px;
             }
             
             .interpretation-item {
                 page-break-inside: avoid;
+                max-width: 100%;
+                margin: 10px 0;
             }
             
             .tips-container {
                 page-break-inside: avoid;
+                max-width: 100%;
+                margin: 15px 0;
             }
             
             .tip-card {
                 page-break-inside: avoid;
+                margin-bottom: 10px;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
             }
         }
 
@@ -418,7 +487,7 @@
             <!-- SECCIÓN DE RESULTADOS -->
             <div class="section" id="resultsSection">
                 <div class="results-container">
-                    <h2 style="font-size: 2em; text-align: center;">Tu Perfil de Manejo de Conflicto</h2>
+                    <h2 style="font-size: 2em; text-align: center; margin-bottom: 30px;">Tu Perfil de Manejo de Conflicto</h2>
 
                     <div id="pdfContent">
                         <div class="chart-container">
@@ -426,12 +495,12 @@
                         </div>
 
                         <div>
-                            <h2 style="margin-bottom: 20px; font-size: 1.5em;">Interpretación de Resultados</h2>
+                            <h2 style="margin: 30px 0 20px 0; font-size: 1.5em; text-align: center;">Interpretación de Resultados</h2>
                             <div class="interpretation-container" id="interpretationsContainer"></div>
                         </div>
 
                         <div class="tips-container">
-                            <h2>💡 Tips para Mejorar tu Manejo de Conflictos</h2>
+                            <h2 style="text-align: center; margin-top: 0; margin-bottom: 20px;">💡 Tips para Mejorar tu Manejo de Conflictos</h2>
                             <div class="tips-grid" id="tipsContainer"></div>
                         </div>
                     </div>
@@ -1104,33 +1173,33 @@
                 return;
             }
             
-            // Mostrar un mensaje mientras se genera
             const originalText = document.querySelector('.btn-success').textContent;
             document.querySelector('.btn-success').textContent = '⏳ Generando PDF...';
             document.querySelector('.btn-success').disabled = true;
             
-            // Esperar a que todo esté listo
             setTimeout(() => {
                 const opt = {
-                    margin: [15, 15, 15, 15],
+                    margin: [10, 10, 10, 10],
                     filename: 'Test-Thomas-Kilmann-Resultados.pdf',
                     image: { type: 'jpeg', quality: 0.95 },
                     html2canvas: { 
-                        scale: 3,
+                        scale: 2.5,
                         useCORS: true,
                         allowTaint: true,
                         backgroundColor: '#ffffff',
                         logging: false,
-                        windowHeight: element.scrollHeight + 100,
-                        windowWidth: 1200,
-                        timeout: 10000
+                        windowHeight: element.scrollHeight,
+                        windowWidth: 900,
+                        timeout: 15000,
+                        letterRendering: true
                     },
                     jsPDF: { 
                         orientation: 'portrait', 
                         unit: 'mm', 
-                        format: 'a4'
+                        format: 'a4',
+                        compress: false
                     },
-                    pagebreak: { mode: 'avoid-all', before: '.interpretation-item' }
+                    pagebreak: { mode: 'avoid-all', before: '.interpretation-item', after: '.tip-card' }
                 };
                 
                 html2pdf()
@@ -1147,7 +1216,7 @@
                         document.querySelector('.btn-success').disabled = false;
                         alert('Problema al generar PDF. Por favor intenta de nuevo.');
                     });
-            }, 800);
+            }, 1000);
         }
 
         init();
