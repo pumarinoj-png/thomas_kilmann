@@ -319,6 +319,31 @@
             display: block;
         }
 
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .chart-container {
+                page-break-inside: avoid;
+                background: white;
+                padding: 20px;
+            }
+            
+            .interpretation-item {
+                page-break-inside: avoid;
+            }
+            
+            .tips-container {
+                page-break-inside: avoid;
+            }
+            
+            .tip-card {
+                page-break-inside: avoid;
+            }
+        }
+
         @media (max-width: 768px) {
             header h1 {
                 font-size: 1.8em;
@@ -619,11 +644,16 @@
             optionA.classList.remove('selected');
             optionB.classList.remove('selected');
 
+            const isAnswered = userResponses[question.id];
             if (userResponses[question.id] === 'a') optionA.classList.add('selected');
             if (userResponses[question.id] === 'b') optionB.classList.add('selected');
 
             document.getElementById('prevBtn').disabled = index === 0;
-            document.getElementById('nextBtn').textContent = index === questions.length - 1 ? 'Ver Resultados' : 'Siguiente →';
+            
+            // Desactivar botón siguiente hasta que conteste
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.disabled = !isAnswered;
+            nextBtn.textContent = index === questions.length - 1 ? 'Ver Resultados' : 'Siguiente →';
         }
 
         function selectOption(option) {
@@ -695,8 +725,11 @@
 
             setTimeout(() => {
                 displayChart(results);
-                displayInterpretations(results);
-                displayTips(results);
+                // Esperar más tiempo para que el gráfico se renderice completamente
+                setTimeout(() => {
+                    displayInterpretations(results);
+                    displayTips(results);
+                }, 500);
             }, 100);
         }
 
@@ -977,20 +1010,58 @@
 
         function compartirResultados() {
             const results = calculateResults();
-            const text = `Mis resultados del Test Thomas-Kilmann:\n\n${Object.entries(results).map(([style, score]) => `${style}: ${score} puntos`).join('\n')}`;
-            alert(text);
+            
+            let text = `🎯 MIS RESULTADOS - TEST THOMAS-KILMANN\n`;
+            text += `════════════════════════════════════════\n\n`;
+            
+            Object.entries(results).forEach(([style, score]) => {
+                let level = '';
+                if (score >= 10) level = 'Muy Alto';
+                else if (score >= 8) level = 'Alto';
+                else if (score >= 5) level = 'Promedio';
+                else if (score >= 3) level = 'Bajo';
+                else level = 'Muy Bajo';
+                
+                text += `${style}: ${score}/12 - ${level}\n`;
+            });
+            
+            text += `\n════════════════════════════════════════\n`;
+            text += `Realiza el test: https://thomas-kilmann-[tudominio].vercel.app`;
+            
+            // Copiar al portapapeles
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✓ Resultados copiados al portapapeles:\n\n' + text);
+            }).catch(() => {
+                alert(text);
+            });
         }
 
         function descargarPDF() {
             const element = document.getElementById('pdfContent');
+            
+            // Crear copia para PDF
+            const clonedElement = element.cloneNode(true);
+            
             const opt = {
-                margin: 10,
+                margin: [15, 15, 15, 15],
                 filename: 'Test-Thomas-Kilmann-Resultados.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: { 
+                    orientation: 'portrait', 
+                    unit: 'mm', 
+                    format: 'a4',
+                    compress: true
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
-            html2pdf().set(opt).from(element).save();
+            
+            html2pdf().set(opt).from(clonedElement).save();
         }
 
         init();
